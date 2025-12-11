@@ -4,7 +4,7 @@ A simple FastAPI server that displays macOS notifications. Useful for receiving 
 
 ## Installation
 
-Requires [uv](https://docs.astral.sh/uv/) and Python 3.14+.
+Requires [uv](https://docs.astral.sh/uv/) (which will automatically install the required Python version if not already installed).
 
 ```bash
 git clone https://github.com/ohnotnow/macos_notification_api.git
