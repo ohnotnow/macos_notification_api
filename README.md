@@ -24,6 +24,8 @@ Available options:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
+| `SERVER_HOST` | `0.0.0.0` | Host to bind to (`127.0.0.1` for local only) |
+| `SERVER_PORT` | `8000` | Port to listen on |
 | `CUSTOM_SOUND_PATH` | _(none)_ | Path to a directory of custom sounds. |
 | `DEFAULT_TITLE` | `Notification` | Default notification title |
 | `DEFAULT_MESSAGE` | `Hello!` | Default notification message |
@@ -85,6 +87,74 @@ Then from your Pi:
 
 ```bash
 curl "http://192.168.1.100:8000/notify?title=Pi&message=Task%20complete&sound=Glass"
+```
+
+## Running as a Background Service
+
+You can run the notification server as a macOS Launch Agent so it starts automatically when you log in.
+
+### Install the service
+
+```bash
+./service.sh install
+```
+
+This will:
+- Create a launchd plist with your current `.env` settings
+- Start the server immediately
+- Configure it to start on login and restart if it crashes
+
+### Service commands
+
+```bash
+./service.sh install    # Install and start the service
+./service.sh uninstall  # Stop and remove the service
+./service.sh status     # Check if service is running
+./service.sh logs       # View recent log output
+./service.sh restart    # Restart (also picks up .env changes)
+```
+
+### Changing configuration
+
+To change the host or port after installation:
+
+1. Edit your `.env` file
+2. Run `./service.sh restart`
+
+### Logs
+
+Logs are stored in `~/Library/Logs/notification-server-python/`:
+- `stdout.log` - Server output
+- `stderr.log` - Errors
+
+## Shell Alias
+
+Add this function to your `~/.bashrc` or `~/.zshrc` for quick notifications:
+
+```bash
+notify() {
+  local title="${1:-Notification}"
+  local message="${2:-Hello!}"
+  local sound="$3"
+
+  # Simple URL encoding using sed (covers common characters)
+  urlencode() { printf %s "$1" | sed 's/ /%20/g; s/!/%21/g; s/"/%22/g; s/#/%23/g; s/&/%26/g; s/'\''/%27/g'; }
+
+  # Or if you have jq installed, use this for full URL encoding:
+  # urlencode() { printf %s "$1" | jq -sRr @uri; }
+
+  local url="http://localhost:8000/notify?title=$(urlencode "$title")&message=$(urlencode "$message")"
+  [[ -n "$sound" ]] && url+="&sound=$(urlencode "$sound")"
+  curl -s "$url" > /dev/null
+}
+```
+
+Then use it like:
+
+```bash
+notify "Build complete" "Your project finished compiling" "Glass"
+notify "Quick alert" "Something happened"  # uses default sound
+notify  # uses all defaults
 ```
 
 ## Custom Sounds

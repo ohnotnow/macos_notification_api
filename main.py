@@ -13,6 +13,8 @@ DEFAULT_TITLE = os.getenv("DEFAULT_TITLE", "Notification")
 DEFAULT_MESSAGE = os.getenv("DEFAULT_MESSAGE", "Hello!")
 DEFAULT_SOUND = os.getenv("DEFAULT_SOUND", "Sosumi")
 CUSTOM_SOUND_PATH = os.getenv("CUSTOM_SOUND_PATH")
+SERVER_HOST = os.getenv("SERVER_HOST", "0.0.0.0")
+SERVER_PORT = int(os.getenv("SERVER_PORT", "8000"))
 
 
 class NotificationRequest(BaseModel):
@@ -49,4 +51,9 @@ def notify_get(
     """Send a notification via GET request with query parameters."""
     send_notification(title, message, sound)
 
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host=SERVER_HOST, port=SERVER_PORT)
 
